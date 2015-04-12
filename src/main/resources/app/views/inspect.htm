@@ -11,6 +11,42 @@
     <div style="display: inline; float: right; width: 85%">
         <div class="streaming_topics_container" style="margin-right: 5px">
             <div class="full_block">
+                <!-- Health -->
+                <div ng-show="inspectTab.name == 'Health'">
+                    <div class="full_block hide_show_topics">
+                        <div ng-hide="healthStats.length">
+                            <img src="/app/images/status/greenlight.png">
+                            <span class="positive">The system is healthy</span>
+                        </div>
+                    </div>
+                    <div style="display: inline; float: left; width: 69.9%">
+                        <div ng-show="healthStats.length">
+                            <img src="/app/images/status/yellowlight.gif">
+                            <span class="warning">Trifecta has found issues</span>
+                            <div ng-repeat="hs in healthStats">
+                                <img ng-src="/app/images/{{hs.loading ? 'status/loading.gif' : hs.expanded ? 'buttons/collapse.png' : 'buttons/expand.png'}}"
+                                     class="clickable" ng-click="expandTopicConsumers(hs)">
+                                <img ng-src="{{ getTopicHealthIcon(hs) }}"> {{ hs.topic }}
+                                <div ng-show="hs.expanded" ng-repeat="r in hs.replicas">
+                                    <div>{{ r.host }}:{{ r.port }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: inline; float: right; width: 30%; height: 100%; border-left: 1px solid #cccccc; padding-left: 4px">
+                        <div ng-include="'/app/views/partials/hints_and_tips.htm'"></div>
+                        <p><img class="bulb" src="/app/images/common/bulb-16.png"> This view provides the user
+                            with information about the replication of topic partitions. The replication state of each partition
+                            is displayed as a percentage:
+                        <ul>
+                            <li><span class="in_sync_green">100%</span> &#8212; indicates a healthy fully replicated partition</li>
+                            <li><span class="in_sync_yellow">1% to 99%</span> &#8212; indicates an under-replicated partition</li>
+                            <li><span class="in_sync_red">0%</span> &#8212; indicates a partition that is completely unavailable</li>
+                        </ul>
+                        </p>
+                    </div>
+                </div>
+
                 <!-- Brokers -->
                 <div ng-show="inspectTab.name == 'Brokers'">
                     <div style="display: inline; float: left; width: 69.9%; height: 525px; border-right: 1px solid #cccccc">
@@ -167,6 +203,7 @@
                     </div>
                 </div>
 
+                <!-- Replicas -->
                 <div ng-show="inspectTab.name == 'Replicas'">
                     <div style="display: inline; float: left; width: 69.9%">
                         <div ng-include="'/app/views/partials/hide_show_empty_topics.htm'"></div>
@@ -209,6 +246,7 @@
                     </div>
                 </div>
 
+                <!-- Leaders -->
                 <div ng-show="inspectTab.name == 'Leaders'">
                     <div style="display: inline; float: left; width: 69.9%; height: 525px; border-right: 1px solid #cccccc">
                         <div ng-include="'/app/views/partials/hide_show_empty_topics.htm'"></div>
@@ -276,6 +314,7 @@
                     </div>
                 </div>
 
+                <!-- Zookeeper -->
                 <div ng-show="inspectTab.name == 'Zookeeper'" class="block" style="margin-left: 5px">
                     <div style="display: inline; width: 40.9%; float: left; border-right: 1px solid #cccccc" class="zk_item_container">
                         <div ng-repeat="item in zkItems" ng-include="'zk_item_tree.htm'"></div>
