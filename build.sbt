@@ -32,6 +32,11 @@ mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) => {
   }
 }
 
+// ldaniels528 Dependencies
+libraryDependencies ++= Seq(
+  "com.ldaniels528" %% "tabular" % "0.1.1"
+)
+
 // Avro Dependencies
 libraryDependencies ++= Seq(
   "com.twitter" %% "bijection-core" % "0.7.2",
