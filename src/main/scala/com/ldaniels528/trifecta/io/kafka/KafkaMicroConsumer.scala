@@ -8,7 +8,6 @@ import com.ldaniels528.trifecta.io.kafka.KafkaMicroConsumer._
 import com.ldaniels528.trifecta.io.zookeeper.ZKProxy
 import com.ldaniels528.trifecta.messages.BinaryMessage
 import com.ldaniels528.trifecta.messages.logic.Condition
-import com.ldaniels528.trifecta.util.OptionHelper._
 import com.ldaniels528.trifecta.util.ResourceHelper._
 import kafka.api._
 import kafka.common._
@@ -26,7 +25,8 @@ import scala.util.{Failure, Success, Try}
  */
 class KafkaMicroConsumer(topicAndPartition: TopicAndPartition, seedBrokers: Seq[Broker]) {
   // get the leader, meta data and replica brokers
-  val (leader, _, replicas) = getLeaderPartitionMetaDataAndReplicas(topicAndPartition, seedBrokers)
+  val (leader, _, replicas) = getLeaderPartitionMetaDataAndReplicasList(topicAndPartition, seedBrokers)
+    .headOption
     .getOrElse(throw new VxKafkaTopicException("The leader broker could not be determined", topicAndPartition))
 
   // generate the client ID
@@ -355,8 +355,7 @@ object KafkaMicroConsumer {
     zk.getChildren(basePath) flatMap { brokerId =>
       zk.readString(s"$basePath/$brokerId") map { json =>
         val details = parse(json).extract[BrokerDetails]
-        Try(details.timestamp = sdf.format(new java.util.Date(details.timestamp.toLong)))
-        details
+        details.copy(timestamp = sdf.format(new java.util.Date(details.timestamp.toLong)))
       }
     }
   }
@@ -390,7 +389,7 @@ object KafkaMicroConsumer {
   def getReplicas(topic: String, brokers: Seq[Broker])(implicit zk: ZKProxy): Seq[ReplicaBroker] = {
     val results = for {
       partition <- getTopicPartitions(topic)
-      (leader, pmd, replicas) <- getLeaderPartitionMetaDataAndReplicas(TopicAndPartition(topic, partition), brokers)
+      (leader, pmd, replicas) <- getLeaderPartitionMetaDataAndReplicasList(TopicAndPartition(topic, partition), brokers).headOption
       inSyncReplicas = pmd.isr map (r => Broker(r.host, r.port, r.id))
     } yield (partition, replicas, inSyncReplicas)
 
@@ -547,10 +546,9 @@ object KafkaMicroConsumer {
   /**
    * Retrieves the partition meta data and replicas for the lead broker
    */
-  private def getLeaderPartitionMetaDataAndReplicas(tap: TopicAndPartition, brokers: Seq[Broker]): Option[(Broker, PartitionMetadata, Seq[Broker])] = {
+  private def getLeaderPartitionMetaDataAndReplicasList(tap: TopicAndPartition, brokers: Seq[Broker]): List[(Broker, PartitionMetadata, Seq[Broker])] = {
     for {
-      pmd <- brokers.foldLeft[Option[PartitionMetadata]](None)((result, broker) =>
-        result ?? getPartitionMetadata(broker, tap).headOption)
+      pmd <- brokers.foldLeft[List[PartitionMetadata]](Nil)((list, broker) => list ::: getPartitionMetadata(broker, tap).toList)
       leader <- pmd.leader map (r => Broker(r.host, r.port, r.id))
       replicas = pmd.replicas map (r => Broker(r.host, r.port, r.id))
     } yield (leader, pmd, replicas)
@@ -627,6 +625,9 @@ object KafkaMicroConsumer {
   case class MessageData(partition: Int, offset: Long, nextOffset: Long, lastOffset: Long, key: Array[Byte], message: Array[Byte])
     extends BinaryMessage
 
+  /**
+   * Represents a replica broker
+   */
   case class ReplicaBroker(partition: Int, host: String, port: Int, id: Int, inSync: Boolean)
 
   /**
@@ -634,21 +635,23 @@ object KafkaMicroConsumer {
    */
   case class TopicDetails(topic: String, partitionId: Int, leader: Option[Broker], replicas: Seq[Broker], isr: Seq[Broker], sizeInBytes: Int)
 
+  /**
+   * Represents the summary for a Kafka topic
+   */
   case class TopicSummary(topic: String, partitions: Int)
 
   /**
    * Object representation of the broker information JSON
    * {"jmx_port":9999,"timestamp":"1405818758964","host":"dev502","version":1,"port":9092}
    */
-  case class BrokerDetails(jmx_port: Int, var timestamp: String, host: String, version: Int, port: Int)
+  case class BrokerDetails(jmx_port: Int, timestamp: String, host: String, version: Int, port: Int)
 
   /**
    * Represents a class of exceptions that occur while attempting to fetch data from a Kafka broker
    * @param message the given error message
    * @param cause the given root cause of the exception
    */
-  class VxKafkaException(message: String, cause: Throwable = null)
-    extends RuntimeException(message, cause)
+  class VxKafkaException(message: String, cause: Throwable = null) extends RuntimeException(message, cause)
 
   /**
    * Represents a class of exceptions that occur while attempting to fetch data from a Kafka broker
@@ -664,27 +667,28 @@ object KafkaMicroConsumer {
   class VxKafkaTopicException(message: String, tap: TopicAndPartition, cause: Throwable = null)
     extends VxKafkaException(s"$message for topic ${tap.topic} partition ${tap.partition}", cause)
 
-  import kafka.common.ErrorMapping._
-
   /**
    * Kafka Error Codes
    * @see https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol
    */
-  val ERROR_CODES = Map(
-    BrokerNotAvailableCode -> "Broker Not Available",
-    InvalidFetchSizeCode -> "Invalid Fetch Size",
-    InvalidMessageCode -> "Invalid Message",
-    LeaderNotAvailableCode -> "Leader Not Available",
-    MessageSizeTooLargeCode -> "Message Size Too Large",
-    NoError -> "No Error",
-    NotLeaderForPartitionCode -> "Not Leader For Partition",
-    OffsetMetadataTooLargeCode -> "Offset Metadata Too Large",
-    OffsetOutOfRangeCode -> "Offset Out Of Range",
-    ReplicaNotAvailableCode -> "Replica Not Available",
-    RequestTimedOutCode -> "Request Timed Out",
-    StaleControllerEpochCode -> "Stale Controller Epoch",
-    StaleLeaderEpochCode -> "Stale Leader Epoch",
-    UnknownCode -> "Unknown Code",
-    UnknownTopicOrPartitionCode -> "Unknown Topic-Or-Partition")
+  val ERROR_CODES = {
+    import kafka.common.ErrorMapping._
+    Map(
+      BrokerNotAvailableCode -> "Broker Not Available",
+      InvalidFetchSizeCode -> "Invalid Fetch Size",
+      InvalidMessageCode -> "Invalid Message",
+      LeaderNotAvailableCode -> "Leader Not Available",
+      MessageSizeTooLargeCode -> "Message Size Too Large",
+      NoError -> "No Error",
+      NotLeaderForPartitionCode -> "Not Leader For Partition",
+      OffsetMetadataTooLargeCode -> "Offset Metadata Too Large",
+      OffsetOutOfRangeCode -> "Offset Out Of Range",
+      ReplicaNotAvailableCode -> "Replica Not Available",
+      RequestTimedOutCode -> "Request Timed Out",
+      StaleControllerEpochCode -> "Stale Controller Epoch",
+      StaleLeaderEpochCode -> "Stale Leader Epoch",
+      UnknownCode -> "Unknown Code",
+      UnknownTopicOrPartitionCode -> "Unknown Topic-Or-Partition")
+  }
 
 }
