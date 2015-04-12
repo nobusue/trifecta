@@ -18,7 +18,14 @@
 
             // pre-load the existing brokers
             service.getBrokerDetails().then(function(brokers) {
-                service.brokers = brokers;
+                service.brokers = brokers.sort(function(a, b) {
+                    if(a.host < b.host) return -1;
+                    else if(a.host > b.host) return 1;
+                    else return 0;
+                });
+                if(brokers.length) {
+                    brokers[0].expanded = true;
+                }
             });
 
             return service;

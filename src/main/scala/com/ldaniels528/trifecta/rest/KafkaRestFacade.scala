@@ -9,7 +9,7 @@ import com.ldaniels528.trifecta.command.parser.CommandParser
 import com.ldaniels528.trifecta.io.ByteBufferUtils
 import com.ldaniels528.trifecta.io.avro.AvroConversion
 import com.ldaniels528.trifecta.io.json.{JsonDecoder, JsonHelper}
-import com.ldaniels528.trifecta.io.kafka.KafkaMicroConsumer.{BrokerDetails, DEFAULT_FETCH_SIZE, MessageData}
+import com.ldaniels528.trifecta.io.kafka.KafkaMicroConsumer.{TopicDetails, BrokerDetails, DEFAULT_FETCH_SIZE, MessageData}
 import com.ldaniels528.trifecta.io.kafka.{Broker, KafkaMicroConsumer, KafkaPublisher}
 import com.ldaniels528.trifecta.io.zookeeper.ZKProxy
 import com.ldaniels528.trifecta.messages.MessageCodecs.{LoopBackCodec, PlainTextCodec}
@@ -343,6 +343,15 @@ case class KafkaRestFacade(config: TxConfig, zk: ZKProxy) {
    */
   def getFirstOffset(topic: String, partition: Int)(implicit zk: ZKProxy): Option[Long] = {
     new KafkaMicroConsumer(TopicAndPartition(topic, partition), brokers) use (_.getFirstOffset)
+  }
+
+  /**
+   * Retrieves the list of Kafka replicas for a given topic
+   */
+  def getHealthStats = Future {
+    KafkaMicroConsumer.getTopicList(brokers).groupBy(_.topic) map { case (topic, details) =>
+      HealthJs(topic, details)
+    }
   }
 
   /**
@@ -768,6 +777,8 @@ object KafkaRestFacade {
   case class ErrorJs(message: String, `type`: String = "error")
 
   case class FormattedData(`type`: String, value: Any)
+
+  case class HealthJs(topic: String, details: Seq[TopicDetails])
 
   case class LeaderAndReplicasJs(partition: Int, leader: Broker, replica: Broker)
 

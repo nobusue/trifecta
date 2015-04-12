@@ -151,6 +151,7 @@ class WebContentActor(facade: KafkaRestFacade) extends Actor with ActorLogging {
             case topic :: schemaName :: Nil => facade.getDecoderSchemaByName(topic, schemaName).toJson.mimeJson
             case _ => missingArgs("topic", "schemaName")
           }
+          case "getHealthStats" => facade.getHealthStats.toJson.mimeJson
           case "getMessage" => args match {
             case topic :: partition :: offset :: Nil => facade.getMessageData(topic, partition.toInt, offset.toLong).toJson.mimeJson
             case _ => missingArgs("topic", "partition", "offset")

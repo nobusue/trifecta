@@ -581,7 +581,7 @@ object KafkaMicroConsumer {
    * @param path the given Zookeeper/Kafka path
    * @return the prefixed path
    */
-  private def getPrefixedPath(path: String) = s"$rootKafkaPath$path"
+  private def getPrefixedPath(path: String) = s"$rootKafkaPath$path".replaceAllLiterally("//", "/")
 
   /**
    * Retrieves the partition meta data for the given broker
