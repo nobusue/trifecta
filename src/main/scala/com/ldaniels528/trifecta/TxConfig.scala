@@ -3,12 +3,13 @@ package com.ldaniels528.trifecta
 import java.io.{File, FileInputStream, FileOutputStream}
 import java.util.Properties
 
+import com.ldaniels528.commons.helpers.{StringHelper, ResourceHelper, PropertiesHelper, OptionHelper}
 import com.ldaniels528.trifecta.TxConfig._
 import com.ldaniels528.trifecta.io.avro.AvroDecoder
-import com.ldaniels528.trifecta.util.OptionHelper._
-import com.ldaniels528.trifecta.util.PropertiesHelper._
-import com.ldaniels528.trifecta.util.ResourceHelper._
-import com.ldaniels528.trifecta.util.StringHelper._
+import OptionHelper._
+import PropertiesHelper._
+import ResourceHelper._
+import StringHelper._
 import org.slf4j.LoggerFactory
 
 import scala.collection.concurrent.TrieMap

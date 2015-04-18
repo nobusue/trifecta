@@ -2,8 +2,9 @@ package com.ldaniels528.trifecta.io.gzip
 
 import java.io._
 import java.util.zip._
-
-import com.ldaniels528.trifecta.util.ResourceHelper._
+import com.ldaniels528.commons.helpers.ResourceHelper
+import ResourceHelper._
+import com.ldaniels528.commons.helpers.ResourceHelper
 import org.apache.commons.io.IOUtils
 
 import scala.util.Try

@@ -1,14 +1,14 @@
 package com.ldaniels528.trifecta.io.kafka
 
 import java.util.concurrent.atomic.{AtomicInteger, AtomicLong, AtomicReference}
-
+import com.ldaniels528.commons.helpers.ResourceHelper
 import com.ldaniels528.trifecta.io.AsyncIO.IOCounter
 import com.ldaniels528.trifecta.io.ByteBufferUtils._
 import com.ldaniels528.trifecta.io.kafka.KafkaMicroConsumer._
 import com.ldaniels528.trifecta.io.zookeeper.ZKProxy
 import com.ldaniels528.trifecta.messages.BinaryMessage
 import com.ldaniels528.trifecta.messages.logic.Condition
-import com.ldaniels528.trifecta.util.ResourceHelper._
+import ResourceHelper._
 import kafka.api._
 import kafka.common._
 import kafka.consumer.SimpleConsumer

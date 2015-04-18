@@ -2,13 +2,13 @@ package com.ldaniels528.trifecta.modules
 
 import java.net.{URL, URLClassLoader}
 import java.nio.ByteBuffer
-
+import com.ldaniels528.commons.helpers.ProcessHelper
 import com.ldaniels528.trifecta.TxRuntimeContext
 import com.ldaniels528.trifecta.command.parser.CommandParser._
 import com.ldaniels528.trifecta.command.{Command, UnixLikeArgs}
 import com.ldaniels528.trifecta.io._
 import com.ldaniels528.trifecta.modules.Module.formatTypes
-import com.ldaniels528.trifecta.util.ProcessHelper._
+import ProcessHelper._
 import net.liftweb.json._
 
 /**

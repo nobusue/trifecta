@@ -1,8 +1,9 @@
 package com.ldaniels528.trifecta.io.kafka
 
 import java.util.Properties
-
-import com.ldaniels528.trifecta.util.PropertiesHelper._
+import com.ldaniels528.commons.helpers.PropertiesHelper
+import PropertiesHelper._
+import com.ldaniels528.commons.helpers.PropertiesHelper
 import kafka.javaapi.producer.Producer
 import kafka.producer.{KeyedMessage, ProducerConfig}
 

@@ -1,5 +1,7 @@
 package com.ldaniels528.trifecta.modules
 
+import com.ldaniels528.commons.helpers.StringHelper
+import com.ldaniels528.commons.helpers.StringHelper._
 import com.ldaniels528.trifecta.command.{Command, UnixLikeArgs, UnixLikeParams}
 import com.ldaniels528.trifecta.io.avro.AvroCodec
 import com.ldaniels528.trifecta.io.json.JsonHelper._
@@ -7,7 +9,6 @@ import com.ldaniels528.trifecta.io.mongodb.{MongoOutputSource, TxMongoCluster, T
 import com.ldaniels528.trifecta.io.{InputSource, KeyAndMessage}
 import com.ldaniels528.trifecta.messages.{BinaryMessaging, MessageDecoder}
 import com.ldaniels528.trifecta.util.ParsingHelper._
-import com.ldaniels528.trifecta.util.StringHelper._
 import com.ldaniels528.trifecta.{TxConfig, TxRuntimeContext}
 import com.mongodb.WriteResult
 import net.liftweb.json.JsonAST.JValue

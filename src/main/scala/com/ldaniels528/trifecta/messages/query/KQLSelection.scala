@@ -1,12 +1,13 @@
 package com.ldaniels528.trifecta.messages.query
 
+import com.ldaniels528.commons.helpers.OptionHelper
 import com.ldaniels528.trifecta.TxRuntimeContext
 import com.ldaniels528.trifecta.io.AsyncIO.IOCounter
 import com.ldaniels528.trifecta.io.{AsyncIO, InputSource, OutputSource}
 import com.ldaniels528.trifecta.messages.logic.ConditionCompiler._
 import com.ldaniels528.trifecta.messages.logic.Expressions.Expression
 import com.ldaniels528.trifecta.messages.{MessageCodecs, MessageDecoder}
-import com.ldaniels528.trifecta.util.OptionHelper._
+import OptionHelper._
 
 import scala.concurrent.ExecutionContext
 

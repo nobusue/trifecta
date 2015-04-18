@@ -4,6 +4,7 @@ import java.io.{File, FileOutputStream}
 import java.util.UUID
 import java.util.concurrent.Executors
 
+import com.ldaniels528.commons.helpers.{StringHelper, ResourceHelper, EitherHelper, OptionHelper}
 import com.ldaniels528.trifecta.TxConfig.TxDecoder
 import com.ldaniels528.trifecta.command.parser.CommandParser
 import com.ldaniels528.trifecta.io.ByteBufferUtils
@@ -18,11 +19,11 @@ import com.ldaniels528.trifecta.messages.logic.Expressions.{AND, Expression, OR}
 import com.ldaniels528.trifecta.messages.query.parser.{KafkaQueryParser, KafkaQueryTokenizer}
 import com.ldaniels528.trifecta.messages.{CompositeTxDecoder, MessageDecoder}
 import com.ldaniels528.trifecta.rest.KafkaRestFacade._
-import com.ldaniels528.trifecta.util.EitherHelper._
-import com.ldaniels528.trifecta.util.OptionHelper.Risky._
-import com.ldaniels528.trifecta.util.OptionHelper._
-import com.ldaniels528.trifecta.util.ResourceHelper._
-import com.ldaniels528.trifecta.util.StringHelper._
+import EitherHelper._
+import OptionHelper.Risky._
+import OptionHelper._
+import ResourceHelper._
+import StringHelper._
 import com.ldaniels528.trifecta.{TxConfig, TxRuntimeContext}
 import kafka.common.TopicAndPartition
 import org.slf4j.LoggerFactory

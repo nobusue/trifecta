@@ -1,13 +1,14 @@
 package com.ldaniels528.trifecta.rest
 
 import akka.actor.{ActorSystem, Props}
+import com.ldaniels528.commons.helpers.ResourceHelper
 import com.ldaniels528.trifecta.TxConfig
 import com.ldaniels528.trifecta.io.zookeeper.ZKProxy
 import com.ldaniels528.trifecta.rest.EmbeddedWebServer._
 import com.ldaniels528.trifecta.rest.KafkaRestFacade.{SamplingCursor, TopicAndPartitions}
 import com.ldaniels528.trifecta.rest.PushEventActor._
 import com.ldaniels528.trifecta.rest.TxWebConfig._
-import com.ldaniels528.trifecta.util.ResourceHelper._
+import ResourceHelper._
 import com.typesafe.config.ConfigFactory
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.routes._

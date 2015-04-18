@@ -3,12 +3,13 @@ package com.ldaniels528.trifecta.modules
 import java.io.File
 
 import com.datastax.driver.core.{ConsistencyLevel, ResultSet}
+import com.ldaniels528.commons.helpers.{StringHelper, OptionHelper}
 import com.ldaniels528.trifecta.command.{Command, UnixLikeArgs, UnixLikeParams}
 import com.ldaniels528.trifecta.io.InputSource
 import com.ldaniels528.trifecta.io.cassandra.{CassandraOutputSource, Casserole, CasseroleSession}
 import com.ldaniels528.trifecta.modules.Module.NameValuePair
-import com.ldaniels528.trifecta.util.OptionHelper._
-import com.ldaniels528.trifecta.util.StringHelper._
+import OptionHelper._
+import StringHelper._
 import com.ldaniels528.trifecta.{TxConfig, TxRuntimeContext}
 
 import scala.collection.JavaConversions._

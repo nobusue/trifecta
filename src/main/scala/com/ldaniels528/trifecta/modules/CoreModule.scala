@@ -5,6 +5,9 @@ import java.text.SimpleDateFormat
 import java.util.concurrent.atomic.AtomicLong
 import java.util.{Date, TimeZone}
 
+import com.ldaniels528.commons.helpers.PathHelper._
+import com.ldaniels528.commons.helpers.ResourceHelper._
+import com.ldaniels528.commons.helpers.StringHelper._
 import com.ldaniels528.trifecta.JobManager.{AsyncIOJob, JobItem}
 import com.ldaniels528.trifecta._
 import com.ldaniels528.trifecta.command._
@@ -12,9 +15,6 @@ import com.ldaniels528.trifecta.io._
 import com.ldaniels528.trifecta.io.avro.{AvroFileInputSource, AvroFileOutputSource}
 import com.ldaniels528.trifecta.io.json.{JSONFileInputSource, JSONFileOutputSource}
 import com.ldaniels528.trifecta.util.ParsingHelper._
-import com.ldaniels528.trifecta.util.PathHelper._
-import com.ldaniels528.trifecta.util.ResourceHelper._
-import com.ldaniels528.trifecta.util.StringHelper._
 import org.apache.commons.io.IOUtils
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -234,7 +234,7 @@ class CoreModule(config: TxConfig) extends Module {
 
     // was the module switch used?
     val commands = params("-m") match {
-      case Some(moduleName) => commandSet.toSeq filter { case (name, cmd) => cmd.module.moduleName == moduleName}
+      case Some(moduleName) => commandSet.toSeq filter { case (name, cmd) => cmd.module.moduleName == moduleName }
       case None => commandSet.toSeq
     }
 

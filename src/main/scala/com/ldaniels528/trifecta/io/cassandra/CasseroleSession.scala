@@ -5,8 +5,9 @@ import java.text.SimpleDateFormat
 import java.util.concurrent.ExecutorService
 
 import com.datastax.driver.core._
+import com.ldaniels528.commons.helpers.ResourceHelper
 import com.ldaniels528.trifecta.io.AsyncIO
-import com.ldaniels528.trifecta.util.ResourceHelper._
+import ResourceHelper._
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConversions._

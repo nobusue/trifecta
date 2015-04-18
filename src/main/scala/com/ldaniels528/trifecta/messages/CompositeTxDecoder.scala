@@ -1,12 +1,13 @@
 package com.ldaniels528.trifecta.messages
 
+import com.ldaniels528.commons.helpers.OptionHelper
 import com.ldaniels528.trifecta.TxConfig.TxDecoder
 import com.ldaniels528.trifecta.io.avro.AvroCodec._
 import com.ldaniels528.trifecta.io.avro.AvroMessageDecoding
 import com.ldaniels528.trifecta.io.json.JsonTranscoding
 import com.ldaniels528.trifecta.messages.logic.Expressions._
 import com.ldaniels528.trifecta.messages.logic.{Condition, MessageEvaluation}
-import com.ldaniels528.trifecta.util.OptionHelper._
+import OptionHelper._
 import net.liftweb.json._
 import org.apache.avro.generic.GenericRecord
 

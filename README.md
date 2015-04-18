@@ -77,6 +77,7 @@ make use of Kafka and ZooKeeper via a console-based tool using simple Unix-like 
 * [Java SDK 1.7] (http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html)
 * [Scala 2.11.6] (http://scala-lang.org/download/)
 * [SBT 0.13+] (http://www.scala-sbt.org/download.html)
+* [Scala Helpers 0.1.0] (https://github.com/ldaniels528/scala-helpers)
 * [Tabular 0.1.1] (https://github.com/ldaniels528/tabular)
 
 <a name="configuring-your-ide"></a>

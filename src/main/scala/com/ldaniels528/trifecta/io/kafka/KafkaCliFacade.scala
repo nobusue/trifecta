@@ -1,7 +1,7 @@
 package com.ldaniels528.trifecta.io.kafka
 
 import java.util.Date
-
+import com.ldaniels528.commons.helpers.ResourceHelper
 import com.ldaniels528.trifecta.TxConfig
 import com.ldaniels528.trifecta.io.AsyncIO.IOCounter
 import com.ldaniels528.trifecta.io.avro.AvroDecoder
@@ -11,7 +11,7 @@ import com.ldaniels528.trifecta.io.zookeeper.ZKProxy
 import com.ldaniels528.trifecta.io.{AsyncIO, KeyAndMessage, OutputSource}
 import com.ldaniels528.trifecta.messages.logic.Condition
 import com.ldaniels528.trifecta.messages.{BinaryMessage, MessageCursor, MessageDecoder}
-import com.ldaniels528.trifecta.util.ResourceHelper._
+import ResourceHelper._
 import kafka.common.TopicAndPartition
 
 import scala.collection.JavaConverters._

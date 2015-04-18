@@ -1,6 +1,8 @@
 package com.ldaniels528.trifecta.util
 
+import com.ldaniels528.commons.helpers.PathHelper
 import PathHelper._
+import com.ldaniels528.commons.helpers.PathHelper
 import org.scalatest.Matchers._
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{GivenWhenThen, BeforeAndAfterEach, FeatureSpec}

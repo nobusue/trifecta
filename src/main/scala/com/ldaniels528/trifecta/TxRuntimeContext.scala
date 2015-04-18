@@ -1,12 +1,13 @@
 package com.ldaniels528.trifecta
 
+import com.ldaniels528.commons.helpers.{StringHelper, OptionHelper}
 import com.ldaniels528.trifecta.command.parser.CommandParser
 import com.ldaniels528.trifecta.io.{InputSource, OutputSource}
 import com.ldaniels528.trifecta.messages.query.parser.KafkaQueryParser
 import com.ldaniels528.trifecta.messages.{CompositeTxDecoder, MessageCodecs, MessageDecoder}
 import com.ldaniels528.trifecta.modules._
-import com.ldaniels528.trifecta.util.OptionHelper._
-import com.ldaniels528.trifecta.util.StringHelper._
+import OptionHelper._
+import StringHelper._
 import org.slf4j.LoggerFactory
 
 import scala.collection.concurrent.TrieMap
