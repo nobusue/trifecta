@@ -33,10 +33,10 @@ mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) => {
 }
 
 // ldaniels528 Dependencies
-libraryDependencies ++= Seq(
-  "com.ldaniels528" %% "commons-helpers" % "0.1.0",
-  "com.ldaniels528" %% "tabular" % "0.1.1"
-)
+//libraryDependencies ++= Seq(
+//  "com.ldaniels528" %% "commons-helpers" % "0.1.0",
+//  "com.ldaniels528" %% "tabular" % "0.1.1"
+//)
 
 // Avro Dependencies
 libraryDependencies ++= Seq(
@@ -93,6 +93,6 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.2.3" % "test"
 )
 
-//resolvers += "Clojars Repo" at "http://clojars.org/repo/"
+resolvers += "Clojars Repo" at "http://clojars.org/repo/"
 
 //resolvers += "Clojure Releases" at "http://build.clojure.org/releases/"
