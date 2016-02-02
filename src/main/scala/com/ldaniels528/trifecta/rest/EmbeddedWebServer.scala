@@ -1,13 +1,13 @@
 package com.ldaniels528.trifecta.rest
 
 import akka.actor.{ActorSystem, Props}
+import akka.routing.RoundRobinPool
 import com.ldaniels528.trifecta.TxConfig
 import com.ldaniels528.trifecta.io.zookeeper.ZKProxy
 import com.ldaniels528.trifecta.rest.EmbeddedWebServer._
 import com.ldaniels528.trifecta.rest.KafkaRestFacade.{SamplingCursor, TopicAndPartitions}
 import com.ldaniels528.trifecta.rest.PushEventActor._
 import com.ldaniels528.trifecta.rest.TxWebConfig._
-import com.ldaniels528.trifecta.util.ResourceHelper._
 import com.typesafe.config.ConfigFactory
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.routes._
@@ -19,15 +19,18 @@ import scala.concurrent.duration._
 import scala.util.Try
 
 /**
- * Trifecta Embedded Web Server
- * @author Lawrence Daniels <lawrence.daniels@gmail.com>
- */
+  * Trifecta Embedded Web Server
+  * @author Lawrence Daniels <lawrence.daniels@gmail.com>
+  */
 class EmbeddedWebServer(config: TxConfig, zk: ZKProxy) extends Logger {
   private lazy val logger = LoggerFactory.getLogger(getClass)
   private val actorSystem = ActorSystem("EmbeddedWebServer", ConfigFactory.parseString(getActorConfig))
   private val sessions = TrieMap[String, WebSocketSession]()
   val sampling = TrieMap[String, TopicAndPartitions]()
   val facade = new KafkaRestFacade(config, zk)
+
+  // create the web content actors
+  private val wcActor = actorSystem.actorOf(Props(new WebContentActor(facade)).withRouter(RoundRobinPool(nrOfInstances = config.webActorConcurrency)))
 
   implicit val ec = actorSystem.dispatcher
 
@@ -41,31 +44,18 @@ class EmbeddedWebServer(config: TxConfig, zk: ZKProxy) extends Logger {
           onComplete = Option(onWebSocketHandshakeComplete),
           onClose = Option(onWebSocketClose))
     }
-    case WebSocketFrame(wsFrame) => wsActor ! wsFrame
+
+    case WebSocketFrame(wsFrame) =>
+      val wsActor = actorSystem.actorOf(Props(new WebSocketActor(this)))
+      wsActor ! wsFrame
   })
 
   // create the web service instance
   val webServer = new WebServer(WebServerConfig(hostname = config.webHost, port = config.webPort), routes, actorSystem)
 
-  // create the web content actors
-  private var wcRouter = 0
-  private val wcActors = (1 to config.webActorConcurrency) map (_ => actorSystem.actorOf(Props(new WebContentActor(facade))))
-
-  // create the web socket actors
-  private var wsRouter = 0
-  private val wsActors = (1 to config.webActorConcurrency) map (_ => actorSystem.actorOf(Props(new WebSocketActor(this))))
-
-  // create the push event actors
-  private var pushRouter = 0
-  private val pushActors = (1 to 2) map (_ => actorSystem.actorOf(Props(new PushEventActor(this))))
-
-  // create the actor references
-  private def wcActor = wcActors(wcRouter % wcActors.length) and (_ => wcRouter += 1)
-
-  private def wsActor = wsActors(wsRouter % wsActors.length) and (_ => wsRouter += 1)
-
-  private def pushActor = pushActors(pushRouter % pushActors.length) and (_ => pushRouter += 1)
-
+  /**
+    * Setup the shutdown hook to shutdown the server
+    */
   Runtime.getRuntime.addShutdownHook(new Thread {
     override def run() = {
       EmbeddedWebServer.this.stopServer()
@@ -73,10 +63,10 @@ class EmbeddedWebServer(config: TxConfig, zk: ZKProxy) extends Logger {
   })
 
   /**
-   * Retrieves a session by the client's web socket ID
-   * @param webSocketId the client's web socket ID
-   * @return an option of a [[WebSocketSession]]
-   */
+    * Retrieves a session by the client's web socket ID
+    * @param webSocketId the client's web socket ID
+    * @return an option of a [[WebSocketSession]]
+    */
   def getSession(webSocketId: String) = sessions.get(webSocketId)
 
   def onWebSocketHandshakeComplete(webSocketId: String) {
@@ -93,8 +83,8 @@ class EmbeddedWebServer(config: TxConfig, zk: ZKProxy) extends Logger {
   }
 
   /**
-   * Starts the embedded app server
-   */
+    * Starts the embedded app server
+    */
   def startServer() {
     implicit val ec = actorSystem.dispatcher
     webServer.start()
@@ -102,6 +92,7 @@ class EmbeddedWebServer(config: TxConfig, zk: ZKProxy) extends Logger {
     // setup consumer update push events
     actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = config.consumerPushInterval.seconds) {
       if (sessions.nonEmpty) {
+        val pushActor = actorSystem.actorOf(Props(new PushEventActor(this)))
         pushActor ! PushConsumers
       }
     }
@@ -109,6 +100,7 @@ class EmbeddedWebServer(config: TxConfig, zk: ZKProxy) extends Logger {
     // setup topic update push events
     actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = config.topicPushInterval.seconds) {
       if (sessions.nonEmpty) {
+        val pushActor = actorSystem.actorOf(Props(new PushEventActor(this)))
         pushActor ! PushTopics
       }
     }
@@ -117,6 +109,7 @@ class EmbeddedWebServer(config: TxConfig, zk: ZKProxy) extends Logger {
     actorSystem.scheduler.schedule(initialDelay = 0.seconds, interval = config.samplingPushInterval.seconds) {
       if (sessions.nonEmpty) {
         sampling foreach { case (webSocketId, topicAndPartitions) =>
+          val pushActor = actorSystem.actorOf(Props(new PushEventActor(this)))
           pushActor ! PushMessage(webSocketId, topicAndPartitions)
         }
       }
@@ -139,8 +132,8 @@ class EmbeddedWebServer(config: TxConfig, zk: ZKProxy) extends Logger {
   }
 
   /**
-   * Stops the embedded app server
-   */
+    * Stops the embedded app server
+    */
   def stopServer() {
     Try(webServer.stop())
     ()
@@ -149,12 +142,13 @@ class EmbeddedWebServer(config: TxConfig, zk: ZKProxy) extends Logger {
 }
 
 /**
- * Embedded Web Server Singleton
- * @author Lawrence Daniels <lawrence.daniels@gmail.com>
- */
+  * Embedded Web Server Singleton
+  * @author Lawrence Daniels <lawrence.daniels@gmail.com>
+  */
 object EmbeddedWebServer {
 
-  private def getActorConfig = """
+  private def getActorConfig =
+    """
       my-pinned-dispatcher {
         type=PinnedDispatcher
         executor=thread-pool-executor

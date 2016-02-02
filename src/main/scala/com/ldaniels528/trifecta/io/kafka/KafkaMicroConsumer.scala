@@ -8,8 +8,8 @@ import com.ldaniels528.trifecta.io.kafka.KafkaMicroConsumer._
 import com.ldaniels528.trifecta.io.zookeeper.ZKProxy
 import com.ldaniels528.trifecta.messages.BinaryMessage
 import com.ldaniels528.trifecta.messages.logic.Condition
-import com.ldaniels528.trifecta.util.OptionHelper._
-import com.ldaniels528.trifecta.util.ResourceHelper._
+import com.ldaniels528.commons.helpers.OptionHelper._
+import com.ldaniels528.commons.helpers.ResourceHelper._
 import kafka.api._
 import kafka.common._
 import kafka.consumer.SimpleConsumer
@@ -372,21 +372,23 @@ object KafkaMicroConsumer {
       // get the list of topics
       val offsetPath = s"$basePath/$consumerId/offsets"
       try {
-      val topics = zk.getChildren(offsetPath).distinct filter (contentFilter(topicPrefix, _))
+        val topics = zk.getChildren(offsetPath).distinct filter (contentFilter(topicPrefix, _))
 
-      // get the list of partitions
-      topics flatMap { topic =>
-        val topicPath = s"$offsetPath/$topic"
-        zk.getChildren(topicPath) flatMap { partitionId =>
-          val partitionPath = s"$topicPath/$partitionId"
-          zk.readString(partitionPath) flatMap { offset =>
-            val lastModified = zk.getModificationTime(partitionPath)
-            Try(ConsumerDetails(consumerId, topic, partitionId.toInt, offset.toLong, lastModified)).toOption
+        // get the list of partitions
+        topics flatMap { topic =>
+          val topicPath = s"$offsetPath/$topic"
+          zk.getChildren(topicPath) flatMap { partitionId =>
+            val partitionPath = s"$topicPath/$partitionId"
+            zk.readString(partitionPath) flatMap { offset =>
+              val lastModified = zk.getModificationTime(partitionPath)
+              Try(ConsumerDetails(consumerId, topic, partitionId.toInt, offset.toLong, lastModified)).toOption
+            }
           }
         }
-      } 
       } catch {
-        case e : Exception => None
+        case e: Exception =>
+          logger.warn("Failed to retrieve consumers", e)
+          None
       }
     }
   }
@@ -452,21 +454,28 @@ object KafkaMicroConsumer {
     // capture the meta data for all topics
     brokers.headOption map { broker =>
       getTopicMetadata(broker, topics) flatMap { tmd =>
+        logger.debug(s"Trying to fetch ${tmd.topic}")
         // check for errors
-        if (tmd.errorCode != 0) throw new VxKafkaCodeException(tmd.errorCode)
-
-        // translate the partition meta data into topic information instances
-        tmd.partitionsMetadata map { pmd =>
-          // check for errors
-          if (pmd.errorCode != 0) throw new VxKafkaCodeException(pmd.errorCode)
-
-          TopicDetails(
-            tmd.topic,
-            pmd.partitionId,
-            pmd.leader map (b => Broker(b.host, b.port, b.id)),
-            pmd.replicas map (b => Broker(b.host, b.port, b.id)),
-            pmd.isr map (b => Broker(b.host, b.port, b.id)),
-            tmd.sizeInBytes)
+        if (tmd.errorCode != 0) {
+          logger.warn(s"Could not read topic ${tmd.topic}, error: ${tmd.errorCode}")
+          None
+        } else {
+          // translate the partition meta data into topic information instances
+          tmd.partitionsMetadata flatMap { pmd =>
+            // check for errors
+            if (pmd.errorCode != 0) {
+              logger.warn(s"Could not read partition ${tmd.topic}/${pmd.partitionId}, error: ${pmd.errorCode}")
+              None
+            } else Some(
+              TopicDetails(
+                tmd.topic,
+                pmd.partitionId,
+                pmd.leader map (b => Broker(b.host, b.port, b.id)),
+                pmd.replicas map (b => Broker(b.host, b.port, b.id)),
+                pmd.isr map (b => Broker(b.host, b.port, b.id)),
+                tmd.sizeInBytes)
+            )
+          }
         }
       }
     } getOrElse Nil
@@ -586,7 +595,7 @@ object KafkaMicroConsumer {
    * @return the prefixed path
    */
   private def getPrefixedPath(path: String) = s"$rootKafkaPath$path".replaceAllLiterally("//", "/")
-  
+
   /**
    * Retrieves the partition meta data for the given broker
    */

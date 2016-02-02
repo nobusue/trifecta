@@ -9,7 +9,7 @@ name := "trifecta"
 
 organization := "com.ldaniels528"
 
-version := "0.18.19"
+version := "0.18.20"
 
 scalaVersion := "2.11.6"
 
@@ -32,6 +32,12 @@ mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) => {
   }
 }
 
+// ldaniels528 Dependencies
+libraryDependencies ++= Seq(
+  "com.ldaniels528" %% "commons-helpers" % "0.1.0",
+  "com.ldaniels528" %% "tabular" % "0.1.1"
+)
+
 // Avro Dependencies
 libraryDependencies ++= Seq(
   "com.twitter" %% "bijection-core" % "0.7.2",
@@ -44,10 +50,9 @@ libraryDependencies ++= Seq(
   "com.101tec" % "zkclient" % "0.4",
   "org.apache.curator" % "curator-framework" % "2.7.1",
   "org.apache.curator" % "curator-test" % "2.7.1",
-  "org.apache.kafka" %% "kafka" % "0.8.2.0"
-    exclude("org.apache.zookeeper", "zookeeper")
+  "org.apache.kafka" %% "kafka" % "0.8.2.2"
     exclude("org.slf4j", "log4j-over-slf4j"),
-  "org.apache.zookeeper" % "zookeeper" % "3.4.6",
+  "org.apache.kafka" % "kafka-clients" % "0.8.2.2",
   "org.apache.storm" % "storm-core" % "0.9.3"
     exclude("org.apache.zookeeper", "zookeeper")
     exclude("org.slf4j", "log4j-over-slf4j")
@@ -76,8 +81,8 @@ libraryDependencies ++= Seq(
   "org.mashupbots.socko" %% "socko-webserver" % "0.6.0"
     exclude("ch.qos.logback", "logback-classic"),
   "org.fusesource.jansi" % "jansi" % "1.11",
-  "org.slf4j" % "slf4j-api" % "1.7.10",
-  "org.slf4j" % "slf4j-log4j12" % "1.7.10",
+  "org.slf4j" % "slf4j-api" % "1.7.6",
+  "org.slf4j" % "slf4j-log4j12" % "1.7.6",
   "net.databinder.dispatch" %% "dispatch-core" % "0.11.2"
 )
 
@@ -88,6 +93,6 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.2.3" % "test"
 )
 
-resolvers += "Clojars Repo" at "http://clojars.org/repo/"
+//resolvers += "Clojars Repo" at "http://clojars.org/repo/"
 
-resolvers += "Clojure Releases" at "http://build.clojure.org/releases/"
+//resolvers += "Clojure Releases" at "http://build.clojure.org/releases/"
