@@ -20,3 +20,7 @@ project/plugins/project/
 
 # IDEA
 .idea/
+
+# Application logs
+log/gc.log*
+log/console.log*

@@ -15,6 +15,9 @@ JAVA_OPTS="$JAVA_OPTS -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GC
 # Log4j setting
 JAVA_OPTS="$JAVA_OPTS -Dlog4j.configuration=file:///home/ec2-user/trifecta/conf/log4j.properties"
 
+# Memory Leak tracking
+JAVA_OPTS="$JAVA_OPTS -Dio.netty.leakDetectionLevel=advanced"
+
 nohup java $JAVA_OPTS -jar /home/ec2-user/trifecta/target/scala-2.11/trifecta_0.18.19.bin.jar --http-start \
 < /dev/null >> ~/trifecta/log/console.log  2>&1 &
 echo $! > /var/run/trifecta/trifecta.pid
