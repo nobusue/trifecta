@@ -1,0 +1,47 @@
+<div ng-controller="DecoderCtrl" ng-init="init()" class="full_block" style="height: 587px">
+    <div id="Decoders" class="col-md-5" style="height: 100%">
+        <fieldset>
+            <legend style="margin-bottom: 0">Decoders</legend>
+            <div ng-show="decoders.length" ng-include="'/assets/views/partials/hide_show_empty_decoders.html'"></div>
+            <div class="d_topics_container">
+                <div ng-repeat="myDecoder in getDecoders() | orderBy:'topic'">
+                    <div ng-class="myDecoder == decoder ? 'highlighted' : ''">
+                        <img class="clickable"
+                             ng-click="expandCollapseDecoder(myDecoder)"
+                             ng-src="/assets/images/{{ myDecoder.loading ? 'status/loading.gif' : myDecoder.decoderExpanded ? 'buttons/collapse.png' : 'buttons/expand.png' }}">
+                        <img ng-src="{{ getTopicIconSelection(myDecoder == decoder) }}">
+                        <span ng-click="selectDecoder(myDecoder)" class="clickable">{{ myDecoder.topic }}</span>
+                        <span class="null">(<span class="messages">{{ myDecoder.schemas.length || 0 }}</span>)</span>
+                    </div>
+
+                    <div ng-show="myDecoder.decoderExpanded">
+                        <div ng-repeat="s in myDecoder.schemas | orderBy:'name'" class="indent">
+                            <img ng-src="{{ getSchemaIcon(s) }}" title="Avro Schema">
+                            <span ng-click="selectSchema(s)" ng-class="s == schema ? 'sub_highlighted' : ''" class="clickable">{{ s.name }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Hints & Tips -->
+        <div class="d_hints_tips_container">
+            <div ng-include="'/assets/views/partials/hints_and_tips.html'"></div>
+            <p><img class="bulb" src="/assets/images/common/bulb-16.png"> Above are the topics that have decoders
+                associated with them (e.g. <a href="http://avro.apache.org" target="avro_window">Avro</a>).
+                These decoders allow the binary data of messages to be transformed into more human readable formats.</p>
+
+            <p><img class="bulb" src="/assets/images/common/bulb-16.png"> When multiple decoders are associated to a topic,
+                each decoder is tested sequentially (starting with the most recently modified) until a decoder is found
+                that successfully decodes the message.</p>
+        </div>
+    </div>
+    <div class="col-md-7" style="height: 100%; padding: 5px 0 5px 5px">
+        <div ng-show="schema.error" class="schema_error">
+            <span class="error">Compile Error:</span> {{ schema.error }}
+        </div>
+        <div class="message_panel">
+            <div hljs source="toPrettyJSON(schema.schemaString, 8)"></div>
+        </div>
+    </div>
+</div>
